@@ -1,41 +1,60 @@
-# AvailabilityConsensus
+# CompatibilityProof
 
-AvailabilityConsensus is a GenLayer Intelligent Contract that verifies whether a specific product, service, or resource is actually available on a public webpage.
+CompatibilityProof is a GenLayer Intelligent Contract for checking whether two products, services, libraries, APIs, standards, or technical systems are compatible using public documentation.
 
-## Why it uses GenLayer
+## What it verifies
 
-A page can contain ambiguous natural-language availability signals such as "pre-order", "contact us", "sold out", or region-specific conditions. The contract uses GenLayer web access and LLM interpretation, then requires an independent validator to agree on the structured decision.
+The user provides:
+- a public documentation URL for item A;
+- a public documentation URL for item B;
+- the names/descriptions of item A and item B;
+- one concrete compatibility question.
 
-## Decision model
+The contract independently evaluates both sources and returns one of:
 
-- `AVAILABLE` — clear evidence that the target can currently be obtained, booked, or ordered.
-- `UNAVAILABLE` — clear evidence that the target is unavailable, sold out, discontinued, etc.
-- `UNCLEAR` — evidence is insufficient or the target cannot be matched confidently.
+- `COMPATIBLE` — the documentation supports compatibility;
+- `INCOMPATIBLE` — the documentation shows a material conflict;
+- `INSUFFICIENT_DATA` — the available evidence is not enough to decide.
 
-The validator compares the stable decision fields rather than requiring identical wording for evidence.
-
-## Contract flow
+## GenLayer consensus flow
 
 ```text
-Target + URL
-    -> Web Access
-    -> Structured LLM extraction
-    -> Independent validator
-    -> GenLayer consensus
-    -> On-chain result
+Item A + Source A
+        \
+         +--> independent web access --> structured LLM decision
+        /
+Item B + Source B
+
+Leader result
+    -> independent validator repeats the analysis
+    -> stable decision fields are compared
+    -> consensus result
+    -> on-chain storage
 ```
+
+The validator does not require identical evidence wording. It checks the stable decision semantics: the compatibility decision and the per-criterion match states.
 
 ## Public methods
 
-- `create_check(url, target)` creates a verification record.
-- `verify_check(check_id)` performs decentralized verification.
+- `create_check(source_a_url, source_b_url, item_a, item_b, compatibility_question)` creates a compatibility check.
+- `verify_check(check_id)` performs the GenLayer consensus verification.
 - `get_check(check_id)` returns the stored record.
 - `exists(check_id)` checks whether a record exists.
 
-## Lint
+## Example questions
+
+- Does library A support the runtime/version required by library B?
+- Can API A consume the format produced by API B?
+- Do product A and accessory B use the same connection standard?
+- Does service A meet the authentication/protocol requirements of service B?
+
+## Local validation
+
+Run the same GenLayer environment used for deployment:
 
 ```bash
-genvm-lint check availability_consensus.py
+genvm-lint check compatibility_proof.py
+genvm-lint schema compatibility_proof.py
 ```
 
-> Run the command in a local GenLayer Python environment with the same `py-genlayer` dependency header. The repository was also checked for Python syntax before packaging.
+Deploy the exact `compatibility_proof.py` committed to this repository. The GitHub file, GenLayer Studio deployment, and Explorer address used in the submission should all correspond to this same source.
